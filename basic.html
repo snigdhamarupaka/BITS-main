@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventitout - Mental Health Support</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- FontAwesome Icons -->
+    
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Set light yellow background for the whole page */
+        body {
+            background-color: #4d4c47; /* Light yellow background */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Full-screen loading screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Dark background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* Style for hidden hover images */
+.hover-image {
+    position: absolute;
+    top: 0;
+    left: 100%; /* Positioned to the right of the card */
+    width: 200px; /* Adjust as needed */
+    height: auto;
+    display: none;
+    transition: transform 0.3s ease;
+    transform: translateX(20px); /* Offset the image slightly */
+    z-index: 2; /* Ensure image appears above other elements */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Show image on hover */
+.service-card:hover .hover-image,
+.feature-card:hover .hover-image {
+    display: block;
+    transform: translateX(0); /* Slide into position */
+}
+
+/* Position adjustments for cards */
+.service-card, .feature-card {
+    position: relative; /* Allows for absolute positioning of images */
+    overflow: visible; /* Ensures images aren't clipped by card boundaries */
+}
+
+
+        /* Fix for the logo video to prevent cropping */
+        #videoLogo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the logo video is not cropped */
+            object-position: center; /* Ensures the video is centered */
+        }
+
+        /* Second video (background video) will be cropped */
+        #videoBackground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Crop the second video */
+            object-position: center;
+            z-index: -1; /* Ensure the video stays in the background */
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #4d4c47;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo video {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: #fff; /* White background for the hero section */
+            color: #333;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .hero-button {
+            background-color: #ffd700;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero-button:hover {
+            background-color: #e6c200;
+        }
+
+        /* Random cute emojis as background */
+        .emoji {
+            position: absolute;
+            font-size: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            animation: moveEmojis 8s ease-in-out infinite;
+        }
+
+        /* Keyframe animation to randomly position emojis */
+        @keyframes moveEmojis {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(-150px, -150px) rotate(45deg);
+            }
+            50% {
+                transform: translate(150px, -200px) rotate(-45deg);
+            }
+            75% {
+                transform: translate(200px, 100px) rotate(90deg);
+            }
+            100% {
+                transform: translate(-100px, 250px) rotate(180deg);
+            }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 50px 20px;
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+            background-color: #fff; /* White background for sections */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Services Section */
+        .services-section .service-cards,
+        .features .feature-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .service-card, .feature-card {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .service-card h3, .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Contact Form */
+        .contact-section form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .contact-section input, .contact-section textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .contact-section button {
+            padding: 10px;
+            background-color: #4b6cb7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .contact-section button:hover {
+            background-color: #3a5699;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        /* Initially hide images */
+.hover-image {
+    display: none;
+    width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+/* Show the image on hover */
+.service-card:hover .hover-image,
+.feature-card:hover .hover-image {
+    display: block;
+}
+
+
+        /* Books Section */
+        .books-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .books-section li {
+            background-color: #f2f2f2;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .books-section li a {
+            color: #4b6cb7;
+            font-size: 18px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .books-section li a:hover {
+            text-decoration: underline;
+        }
+
+        .books-section li p {
+            font-size: 16px;
+            color: #555;
+            margin-top: 5px;
+        }
+        .intro-text {
+    font-size: 24px; /* Increase font size as desired */
+    font-weight: bold; /* Make text bold */
+}
+
+
+    </style>
+    <script>
+        // Function to hide the loading screen and show the page content once video ends
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('pageContent').style.display = 'block';
+        }
+
+        // Function to generate random cute emojis on the page
+        function createRandomEmojis() {
+            const emojis = ["🐱", "🦄", "🐻", "🍭", "🍓", "🍀", "🎀", "🌸", "🌈", "🍪", "🍉", "🧸", "🐼", "🎉"];
+            const container = document.querySelector(".hero");
+
+            // Generate 20 random emojis
+            for (let i = 0; i < 20; i++) {
+                let emoji = document.createElement('span');
+                emoji.classList.add('emoji');
+                emoji.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Randomize the position and animation duration
+                emoji.style.top = `${Math.random() * 100}%`;
+                emoji.style.left = `${Math.random() * 100}%`;
+                emoji.style.animationDuration = `${Math.random() * 5 + 5}s`; // Random between 5s and 10s
+                emoji.style.fontSize = `${Math.random() * 30 + 20}px`; // Random size between 20px and 50px
+                
+                container.appendChild(emoji);
+            }
+        }
+        function showLoginPage() {
+        // Hide the current content (hero section)
+        document.querySelector('.hero').style.display = 'none';
+
+        // Show the login section
+        document.getElementById('login').style.display = 'block';
+    }
+    // Function to show the Ventitout description page after login
+function showVentitoutDescription(event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Hide the login section
+    document.getElementById('login').style.display = 'none';
+
+    // Show the Ventitout description page
+    document.getElementById('ventitout-description').style.display = 'block';
+}
+
+// Function to redirect back to the homepage
+function redirectToHome() {
+    // Redirect to the homepage (or reset the page content)
+    location.reload(); // This reloads the page to go back to the starting state.
+}
+
+        window.onload = function() {
+            createRandomEmojis();
+            var video = document.getElementById("videoLogo");
+            video.play();
+            video.onended = hideLoadingScreen;
+        };
+
+    </script>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <video id="videoLogo" autoplay muted>
+            <source src="logo.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Page Content -->
+    <div id="pageContent" style="display:none;">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo">
+                <video src="logo.mp4" autoplay muted loop></video>
+                <h1>VENTITOUT</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#AboutUs">About Us</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Welcome to</h1>
+            <h1>VENTITOUT</h1>
+            <p class="intro-text">𝖶𝗁𝖾𝗋𝖾 𝗒𝗈𝗎 𝖼𝖺𝗇 𝗀𝗎𝗌𝗁 𝗒𝗈𝗎𝗋 𝗍𝗁𝗈𝗎𝗀𝗁𝗍𝗌.</p>
+
+            <p></p>
+        
+            <button class="hero-button" onclick="showLoginPage()">Start Here</button>
+            <p> </p>
+            <p>Find support for your mental health journey.</p>
+        </section>
+         <!-- Login Section -->
+<section id="login" class="login-section" style="display:none;">
+    <h2>Login</h2>
+    <form id="loginForm">
+       <h1> <input type="text" name="username" placeholder="Username or Email" required> </h1>
+    <h1> <input type="password" name="password" placeholder="Password" required></h1>
+        <button type="submit" onclick="showVentitoutDescription(event)">Login</button>
+
+    </form>
+</section>
+<!-- Ventitout Description Page -->
+<section id="ventitout-description" class="ventitout-description" style="display:none;">
+    <h2>About Ventitout</h2>
+    <p>Ventitout is a platform dedicated to providing mental health support to individuals who are struggling with emotional well-being. We offer personalized support, access to trained professionals, and a safe space for individuals to connect with others facing similar challenges.</p>
+    <p>Our mission is to provide accessible mental health resources, reduce stigma around mental health, and offer a community of empathy and understanding.</p>
+    <button onclick="redirectToHome()">Go Back to Home</button>
+</section>
+
+         <!-- About Us Section -->
+         <section id="about" class="about-section">
+            <h2>About Us</h2>
+            <p>Ventiout provides accessible and compassionate mental health support, helping individuals improve their emotional well-being through a variety of resources and support systems.</p>
+        </section>
+
+<!-- Services Section -->
+<section id="services" class="services-section">
+    <h2>Our Services</h2>
+    <div class="service-cards">
+        <div class="service-card">
+            <h3>1-on-1 Counseling</h3>
+            <p>Connect with trained mental health professionals for personalized support.</p>
+            <img src="counseling.png" alt="Counseling Image" class="hover-image">
+        </div>
+        <div class="service-card">
+            <h3>Group Therapy</h3>
+            <p>Join a supportive community and share your experiences in a safe space.</p>
+            <img src="group-therapy.jpg" alt="Group Therapy Image" class="hover-image">
+        </div>
+        <div class="service-card">
+            <h3>Online Support Community</h3>
+            <p>Find comfort and advice from people facing similar challenges.</p>
+            <img src="support-community.jpg" alt="Support Community Image" class="hover-image">
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+    <h2>Features</h2>
+    <div class="feature-cards">
+        <div class="feature-card">
+            <h3>Peer Support</h3>
+            <p>Connect with peers who understand your journey.</p>
+            <img src="peer-support.jpg" alt="Peer Support Image" class="hover-image">
+        </div>
+        <div class="feature-card">
+            <h3>Professional Help</h3>
+            <p>Access certified mental health professionals for guidance.</p>
+            <img src="professional-help.jpg" alt="Professional Help Image" class="hover-image">
+        </div>
+        <div class="feature-card">
+            <h3>Wellness Resources</h3>
+            <p>Explore tools focused on self-care and stress management.</p>
+            <img src="wellness-resources.jpg" alt="Wellness Resources Image" class="hover-image">
+        </div>
+        <div class="feature-card">
+            <h3>Inclusive Community</h3>
+            <p>Join a safe, inclusive community for empathy and understanding.</p>
+            <img src="inclusive-community.jpg" alt="Inclusive Community Image" class="hover-image">
+        </div>
+    </div>
+</section>
+
+
+
+
+        <!-- Resources Section -->
+        <section id="resources" class="resources">
+            <h2>Resources</h2>
+            <p>Explore a variety of resources designed to support your mental health journey, including articles, guides, and self-help tools. Below are some recommended books:</p>
+            
+            <!-- Books Section -->
+            <div class="books-section">
+                <ul>
+                    <li>
+                        <a href="https://www.amazon.com/dp/0062641543" target="_blank">
+                            <strong>The Power of Now</strong> by Eckhart Tolle
+                        </a>
+                        <p>A guide to spiritual awakening and being present in the moment.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.amazon.com/dp/0399172577" target="_blank">
+                            <strong>Feeling Good: The New Mood Therapy</strong> by David D. Burns
+                        </a>
+                        <p>This book presents cognitive-behavioral therapy techniques to overcome depression.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.amazon.com/dp/0062738529" target="_blank">
+                            <strong>Lost Connections</strong> by Johann Hari
+                        </a>
+                        <p>Explores the root causes of depression and how to reconnect with life.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.amazon.com/dp/0399591358" target="_blank">
+                            <strong>The Anxiety and Phobia Workbook</strong> by Edmund J. Bourne
+                        </a>
+                        <p>Comprehensive guide to understanding and managing anxiety disorders.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.amazon.com/dp/1785043331" target="_blank">
+                            <strong>Radical Acceptance</strong> by Tara Brach
+                        </a>
+                        <p>Teaches mindfulness techniques and how to accept yourself fully.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="contact-section">
+        <h2>Contact Us</h2>
+        <form>
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 VENTITOUT. All rights reserved.</p>
+    </footer>
+   
+
+
+</div>
+</body>
+</html>
